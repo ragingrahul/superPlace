@@ -16,20 +16,12 @@ async function main() {
     `Deployed to ${superPlace.target}`
   );
 
-  // Read existing contract addresses from the JSON file
-  let existingAddresses = [];
-  try {
-    const data = fs.readFileSync('contract-address.json', 'utf8');
-    existingAddresses = JSON.parse(data);
-  } catch (error) {
-    // If the file doesn't exist or is empty, continue with an empty array
+  const contractAddress = {
+    address: superPlace.target
   }
 
-  // Add the new contract address to the array
-  existingAddresses.push(superPlace.target);
-
   // Save the updated array to the JSON file
-  fs.writeFileSync('contract-address.json', JSON.stringify(existingAddresses, null, 2));
+  fs.writeFileSync('contract-address.json', JSON.stringify(contractAddress, null, 2));
 }
 
 // We recommend this pattern to be able to use async/await everywhere

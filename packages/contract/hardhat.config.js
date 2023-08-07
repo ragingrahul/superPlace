@@ -8,7 +8,7 @@ module.exports = {
   solidity: "0.8.19",
   networks: {
     OPGoerli: {
-      url: "https://optimism-goerli.publicnode.com",
+      url: "https://optimism-goerli.public.blastapi.io",
       accounts: [PRIVATE_KEY],
     },
     BaseGoerli: {

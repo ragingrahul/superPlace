@@ -6,9 +6,13 @@
 // global scope, and execute the script.
 const hre = require("hardhat");
 const fs = require('fs');
+require('dotenv').config()
 
 async function main() {
-  const superPlace = await hre.ethers.deployContract("SuperPlace");
+  const _worldId = process.env.WORLD_ID;
+  const _appId = process.env.APP_ID;
+  const _actionId = process.env.ACTION_ID;
+  const superPlace = await hre.ethers.deployContract("SuperPlace", [_worldId, _appId, _actionId]);
 
   await superPlace.waitForDeployment();
 

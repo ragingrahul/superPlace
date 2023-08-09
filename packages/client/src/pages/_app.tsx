@@ -2,14 +2,13 @@ import { getDefaultWallets, RainbowKitProvider } from '@rainbow-me/rainbowkit';
 // import { QueryClientProvider } from '@tanstack/react-query';
 // import { QueryClient } from '@tanstack/query-core';
 import { AppProps } from 'next/app';
-import { configureChains, createConfig, WagmiConfig } from 'wagmi';
+import { configureChains, createClient, WagmiConfig } from 'wagmi';
 import {
   baseGoerli,
   foundry,
   goerli,
   optimismGoerli,
   polygonMumbai,
-  zoraTestnet,
 } from 'wagmi/chains';
 import { ToastContainer } from "react-toastify";
 import { publicProvider } from 'wagmi/providers/public';
@@ -23,13 +22,12 @@ import Header from '@/components/layout/Header';
 
 import { useIsSsr } from '../utils/ssr';
 
-const { chains, publicClient, webSocketPublicClient } = configureChains(
+const { chains, provider } = configureChains(
   [
     goerli,
     polygonMumbai,
     optimismGoerli,
     baseGoerli,
-    zoraTestnet,
     foundry
     // ...(process.env.REACT_APP_ENABLE_TESTNETS === 'true' ? [goerli] : []),
   ],
@@ -41,11 +39,10 @@ const { connectors } = getDefaultWallets({
   chains,
 });
 
-const wagmiConfig = createConfig({
+const wagmiConfig = createClient({
   autoConnect: true,
   connectors,
-  publicClient,
-  webSocketPublicClient,
+  provider
 });
 
 // const reactQueryClient = new QueryClient({
@@ -63,7 +60,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   }
 
   return (
-    <WagmiConfig config={wagmiConfig}>
+    <WagmiConfig client={wagmiConfig}>
       <RainbowKitProvider chains={chains}>
         {/* <QueryClientProvider client={reactQueryClient}> */}
           <Header />

@@ -1,7 +1,6 @@
 import * as React from 'react';
 
 import Wallet from '../Wallet';
-import WorldID from '../worldcoin';
 
 export default function Header() {
   return (
@@ -9,7 +8,6 @@ export default function Header() {
       <div className='layout flex h-14 items-center justify-between'>
         <div>Home</div>
         <div className='flex'>
-          <WorldID />
           <Wallet />
         </div>
       </div>

@@ -1,8 +1,18 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "IWorldID",
-  "sourceName": "contracts/interfaces/IWorldID.sol",
+  "contractName": "IWorldIDGroups",
+  "sourceName": "contracts/interfaces/IWorldIDGroups.sol",
   "abi": [
+    {
+      "inputs": [],
+      "name": "ExpiredRoot",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NonExistentRoot",
+      "type": "error"
+    },
     {
       "inputs": [
         {
@@ -38,7 +48,7 @@
       ],
       "name": "verifyProof",
       "outputs": [],
-      "stateMutability": "view",
+      "stateMutability": "nonpayable",
       "type": "function"
     }
   ],

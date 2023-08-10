@@ -7,6 +7,10 @@ const PRIVATE_KEY = process.env.PRIVATE_KEY;
 module.exports = {
   solidity: "0.8.19",
   networks: {
+    Goerli: {
+      url: "https://rpc.ankr.com/eth_goerli",
+      accounts: [PRIVATE_KEY],
+    },
     OPGoerli: {
       url: "https://optimism-goerli.public.blastapi.io",
       accounts: [PRIVATE_KEY],

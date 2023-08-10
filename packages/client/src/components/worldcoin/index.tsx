@@ -1,27 +1,77 @@
-import { CredentialType, IDKitWidget, ISuccessResult, solidityEncode } from '@worldcoin/idkit'
+import { CredentialType, IDKitWidget, ISuccessResult } from '@worldcoin/idkit'
+import { useState } from 'react';
+import { usePrepareContractWrite } from 'wagmi';
+import { useContractWrite } from 'wagmi';
 import { useAccount } from 'wagmi';
+import { BigNumber } from 'ethers'
+import { decode } from '@/lib/wld'
+
+import superPlaceAddress from '../../../../contract/contract-address.json'
+import superPlaceAbi from '../../../../contract/artifacts/contracts/SuperPlace.sol/SuperPlace.json'
 
 const WorldID = () => {
   const { address } = useAccount()
+  const [proof, setProof] = useState<ISuccessResult | null>(null)
 
-  const onSuccess = (result: ISuccessResult) => {
-    // performing a write function here due to time constraints
+  const { config, error } = usePrepareContractWrite({
+		address: superPlaceAddress.address as `0x${string}`,
+		abi: superPlaceAbi.abi,
+		enabled: proof != null && address != null,
+		functionName: 'draw',
+		args: [
+			address!,
+			proof?.merkle_root ? decode<BigNumber>('uint256', proof?.merkle_root ?? '') : BigNumber.from(0),
+			proof?.nullifier_hash ? decode<BigNumber>('uint256', proof?.nullifier_hash ?? '') : BigNumber.from(0),
+			proof?.proof
+				? decode<[BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber]>(
+						'uint256[8]',
+						proof?.proof ?? ''
+				  )
+				: [
+						BigNumber.from(0),
+						BigNumber.from(0),
+						BigNumber.from(0),
+						BigNumber.from(0),
+						BigNumber.from(0),
+						BigNumber.from(0),
+						BigNumber.from(0),
+						BigNumber.from(0),
+				  ],
+          1,
+          1,
+          1
+		],
+	})
 
-    console.log(result);
-  };
+  console.log(error)
+  // const { config } = usePrepareContractWrite({
+  //   address: superPlaceAddress.address as `0x${string}`,
+  //   abi: superPlaceAbi.abi,
+  //   functionName: 'increment'
+  // })
+
+	const { write } = useContractWrite(config)
 
   return (
-    <IDKitWidget
-      app_id="app_staging_f9f6947352fe2f25b2a7b800845dcf57" // obtained from the Developer Portal
-      action="draw"
-      signal={address} // only for on-chain use cases, this is used to prevent tampering with a message
-      onSuccess={onSuccess}
-      // no use for handleVerify, so it is removed
-      credential_types={['orb' as CredentialType]} // we recommend only allowing orb verification on-chain
-      enableTelemetry
-    >
-      {({ open }) => <button onClick={open}>Verify with World ID</button>}
-    </IDKitWidget>
+  <div>
+    {proof ? (
+					<button onClick={write}>submit tx</button>
+				) : (
+          <IDKitWidget
+            app_id="app_staging_f9f6947352fe2f25b2a7b800845dcf57" // obtained from the Developer Portal
+            action="draw"
+            signal={address} // only for on-chain use cases, this is used to prevent tampering with a message
+            onSuccess={setProof}
+            // no use for handleVerify, so it is removed
+            credential_types={['orb' as CredentialType]} // we recommend only allowing orb verification on-chain
+            enableTelemetry
+          >
+            {({ open }) => <button onClick={open}>Verify with World ID</button>}
+          </IDKitWidget>
+        )}
+  </div>
+    // <button onClick={write}>submit tx</button>
+    
     // <div>
     //   <button onClick={()=> console.log("Test")} className="relative inline-block text-lg group">
     //     <span className="relative z-10 block px-5 py-3 overflow-hidden font-medium leading-tight text-gray-800 transition-colors duration-300 ease-out border-2 border-gray-900 rounded-lg group-hover:text-white">

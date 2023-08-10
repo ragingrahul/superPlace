@@ -1,18 +1,18 @@
 {
   "_format": "hh-sol-artifact-1",
-  "contractName": "IWorldID",
-  "sourceName": "contracts/interfaces/IWorldID.sol",
+  "contractName": "IWorldIDGroups",
+  "sourceName": "contracts/interfaces/IWorldIDGroups.sol",
   "abi": [
     {
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "root",
+          "name": "groupId",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "groupId",
+          "name": "root",
           "type": "uint256"
         },
         {

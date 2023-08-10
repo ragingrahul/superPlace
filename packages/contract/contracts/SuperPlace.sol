@@ -2,7 +2,7 @@
 pragma solidity ^0.8.9;
 
 import { ByteHasher } from "./helpers/ByteHasher.sol";
-import { IWorldID } from "./interfaces/IWorldID.sol";
+import { IWorldIDGroups } from "./interfaces/IWorldIDGroups.sol";
 
 contract SuperPlace {
     mapping(uint256 => mapping(uint256 => bool)) internal haveDrawn;
@@ -20,10 +20,10 @@ contract SuperPlace {
     error InvalidNullifier();
 
     /// @dev The World ID instance that will be used for verifying proofs
-    IWorldID internal immutable worldId;
+    IWorldIDGroups internal immutable worldId;
 
     /// @dev The contract's external nullifier hash
-    uint256 internal immutable externalNullifier;
+    uint256 public externalNullifier;
 
     /// @dev The World ID group ID (always 1)
     uint256 internal immutable groupId = 1;
@@ -32,7 +32,7 @@ contract SuperPlace {
     /// @param _appId The World ID app ID
     /// @param _actionId The World ID action ID
     constructor(
-        IWorldID _worldId,
+        IWorldIDGroups _worldId,
         string memory _appId,
         string memory _actionId
     ) {
@@ -42,11 +42,11 @@ contract SuperPlace {
             .hashToField();
     }
 
-    /// @param signal An arbitrary input from the user, usually the user's wallet address (check README for further details)
-    /// @param root The root of the Merkle tree (returned by the JS widget).
-    /// @param nullifierHash The nullifier hash for this proof, preventing double signaling (returned by the JS widget).
-    /// @param proof The zero-knowledge proof that demonstrates the claimer is registered with World ID (returned by the JS widget).
-    /// @dev Feel free to rename this method however you want! We've used `claim`, `verify` or `execute` in the past.
+    // / @param signal An arbitrary input from the user, usually the user's wallet address (check README for further details)
+    // / @param root The root of the Merkle tree (returned by the JS widget).
+    // / @param nullifierHash The nullifier hash for this proof, preventing double signaling (returned by the JS widget).
+    // / @param proof The zero-knowledge proof that demonstrates the claimer is registered with World ID (returned by the JS widget).
+    // / @dev Feel free to rename this method however you want! We've used `claim`, `verify` or `execute` in the past.
     function draw(
         address signal,
         uint256 root,
@@ -69,12 +69,12 @@ contract SuperPlace {
 
         // First, we make sure this person hasn't done this before
         if (haveDrawn[nullifierHash][currentRound]) revert InvalidNullifier();
-
+        uint256 signalHash = abi.encodePacked(signal).hashToField();
         // We now verify the provided proof is valid and the user is verified by World ID
         worldId.verifyProof(
-            root,
             groupId,
-            abi.encodePacked(signal).hashToField(),
+            root,
+            signalHash,
             nullifierHash,
             externalNullifier,
             proof

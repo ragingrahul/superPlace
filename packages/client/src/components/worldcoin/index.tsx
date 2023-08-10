@@ -20,7 +20,7 @@ const WorldID = () => {
 		functionName: 'draw',
 		args: [
 			address!,
-			proof?.merkle_root ? decode<BigNumber>('uint256', proof?.merkle_root ?? '') : BigNumber.from(0),
+			proof?.merkle_root ? decode<BigNumber>('uint256', proof?.merkle_root ?? '') : BigNumber.from(0) as any,
 			proof?.nullifier_hash ? decode<BigNumber>('uint256', proof?.nullifier_hash ?? '') : BigNumber.from(0),
 			proof?.proof
 				? decode<[BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber]>(
@@ -42,13 +42,6 @@ const WorldID = () => {
           1
 		],
 	})
-
-  console.log(error)
-  // const { config } = usePrepareContractWrite({
-  //   address: superPlaceAddress.address as `0x${string}`,
-  //   abi: superPlaceAbi.abi,
-  //   functionName: 'increment'
-  // })
 
 	const { write } = useContractWrite(config)
 

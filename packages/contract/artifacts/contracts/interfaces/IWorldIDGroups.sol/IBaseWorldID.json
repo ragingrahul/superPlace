@@ -1,0 +1,21 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IBaseWorldID",
+  "sourceName": "contracts/interfaces/IWorldIDGroups.sol",
+  "abi": [
+    {
+      "inputs": [],
+      "name": "ExpiredRoot",
+      "type": "error"
+    },
+    {
+      "inputs": [],
+      "name": "NonExistentRoot",
+      "type": "error"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

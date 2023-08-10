@@ -72,8 +72,8 @@ contract SuperPlace {
         uint256 signalHash = abi.encodePacked(signal).hashToField();
         // We now verify the provided proof is valid and the user is verified by World ID
         worldId.verifyProof(
-            groupId,
             root,
+            groupId,
             signalHash,
             nullifierHash,
             externalNullifier,

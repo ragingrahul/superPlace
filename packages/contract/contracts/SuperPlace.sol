@@ -3,12 +3,12 @@ pragma solidity ^0.8.9;
 
 import { ByteHasher } from "./helpers/ByteHasher.sol";
 import { IWorldIDGroups } from "./interfaces/IWorldIDGroups.sol";
+import { PlaceStruct } from "./helpers/Struct.sol";
 
 contract SuperPlace {
-    mapping(uint256 => mapping(uint256 => bool)) internal haveDrawn;
+    mapping(uint256 => mapping(uint256 => bool)) internal havePlace;
     uint8[100][200] public canvas;
     uint256 public currentRound;
-    // mapping(uint8 => mapping(uint8 => uint256[])) drawList;
 
     using ByteHasher for bytes;
 
@@ -24,6 +24,13 @@ contract SuperPlace {
     /// @dev The World ID group ID (always 1)
     uint256 internal immutable groupId = 1;
 
+    // mailbox contract https://docs.hyperlane.xyz/docs/resources/addresses
+    address public mailbox = 0xCC737a94FecaeC165AbCf12dED095BB13F037685;
+
+    // Event
+    event Received(uint32 origin, address sender, bytes body);
+    event Placed(address user, uint256 x, uint256 y, uint256 color);
+
     /// @param _worldId The WorldID instance that will verify the proofs
     /// @param _appId The World ID app ID
     /// @param _actionId The World ID action ID
@@ -38,48 +45,52 @@ contract SuperPlace {
             .hashToField();
     }
 
-    // / @param signal An arbitrary input from the user, usually the user's wallet address (check README for further details)
-    // / @param root The root of the Merkle tree (returned by the JS widget).
-    // / @param nullifierHash The nullifier hash for this proof, preventing double signaling (returned by the JS widget).
-    // / @param proof The zero-knowledge proof that demonstrates the claimer is registered with World ID (returned by the JS widget).
-    // / @dev Feel free to rename this method however you want! We've used `claim`, `verify` or `execute` in the past.
-    function draw(
-        address signal,
-        uint256 root,
-        uint256 nullifierHash,
-        uint256[8] calldata proof,
-        uint8 x,
-        uint8 y,
-        uint8 color
-    ) public {
-        // TODO if user input user => they can fake address
+    modifier onlyMailbox() {
+        require(msg.sender == mailbox);
+        _;
+    }
+
+    function place(PlaceStruct calldata _place) public {
+        _internalPlace(_place);
+    }
+
+    function hyperlanePlace(
+        uint32 _origin,
+        bytes32 _sender,
+        bytes memory _body
+    ) public onlyMailbox{
+        address sender = ByteHasher.bytes32ToAddress(_sender);
+        emit Received(_origin, sender, _body);
+        PlaceStruct memory _place = abi.decode(_body,(PlaceStruct));
+        _internalPlace(_place);
+    }
+
+    function _internalPlace(PlaceStruct memory _place) internal {
         // TODO should verify x,y,color
 
-        // https://community.optimism.io/docs/developers/build/differences/#transaction-costs
-        // block in time = 2s => 90 block = 1 round
-        uint256 _currentRound = block.number / 90;
-
-        if (currentRound != _currentRound) {
-            currentRound = _currentRound;
+        // each round is 3 minutes
+        if (currentRound + 180 < block.timestamp) {
+            currentRound = block.timestamp;
         }
 
         // First, we make sure this person hasn't done this before
-        if (haveDrawn[nullifierHash][currentRound]) revert InvalidNullifier();
-        uint256 signalHash = abi.encodePacked(signal).hashToField();
+        if (havePlace[_place.nullifierHash][currentRound]) revert InvalidNullifier();
+        uint256 signalHash = abi.encodePacked(_place.signal).hashToField();
         // We now verify the provided proof is valid and the user is verified by World ID
         worldId.verifyProof(
-            root,
+            _place.root,
             groupId,
             signalHash,
-            nullifierHash,
+            _place.nullifierHash,
             externalNullifier,
-            proof
+            _place.proof
         );
 
         // We now record the user has done this, so they can't do it again (proof of uniqueness)
-        haveDrawn[nullifierHash][currentRound] = true;
+        havePlace[_place.nullifierHash][currentRound] = true;
 
-        canvas[x][y] = color;
+        canvas[_place.x][_place.y] = _place.color;
+        emit Placed(_place.signal, _place.x, _place.y, _place.color);
     }
 
     function getCurrentBlockInfo() public view returns (uint, uint) {

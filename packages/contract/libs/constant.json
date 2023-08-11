@@ -1,0 +1,14 @@
+{
+  "base": {
+    "mailbox":"",
+    "interchainGasPaymaster":""
+  },
+  "zora": {
+    "mailbox":"",
+    "interchainGasPaymaster":""
+  },
+  "mode": {
+    "mailbox":"",
+    "interchainGasPaymaster":""
+  }
+}

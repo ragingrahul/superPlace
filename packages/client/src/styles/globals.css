@@ -28,6 +28,10 @@
   /* #endregion  /**======== Primary Color =========== */
 }
 
+.remaining-height {
+  min-height: calc(100vh - 80px);
+}
+
 @layer base {
   /* inter var - latin */
   @font-face {

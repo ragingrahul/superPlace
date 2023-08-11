@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Canvas from '../canvas';
 import WorldID from '../worldcoin';
+import ColorPalette from '../colourpalette';
 import { usePrepareContractWrite } from 'wagmi';
 import { useContractWrite } from 'wagmi';
 import { useAccount } from 'wagmi';
@@ -11,12 +12,33 @@ import { ISuccessResult } from '@worldcoin/idkit';
 import superPlaceAddress from '../../../../contract/contract-address.json'
 import superPlaceAbi from '../../../../contract/artifacts/contracts/SuperPlace.sol/SuperPlace.json'
 
+const colorOptions = {
+  red: '#FF0000',
+  orange: '#FFA500',
+  yellow: '#FFFF00',
+  green: '#00FF00',
+  blue: '#0000FF',
+  purple: '#800080',
+  white: '#FFFFFF',
+  black: '#000000'
+}
+
 const DraggableBox = () => {
   const { address } = useAccount()
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
   const [proof, setProof] = useState<ISuccessResult | null>(null)
+  const [selectedColor,setSelectedColor]=useState<string>("#FF0000")
+  const [coordinates,setCoordinates]=useState<{x:number,y:number}>({x:0,y:0})
+  const [gridColors, setGridColors] = useState<string[][]>(Array.from({ length: 100 }, () => new Array(200).fill('white')));
+
+  const handleCellClick = (row: number, col: number) => {
+    const updatedColors = [...gridColors];
+    updatedColors[row][col] = selectedColor;
+    setGridColors(updatedColors);
+    console.log(row,col)
+  };
 
   const { config } = usePrepareContractWrite({
 		address: superPlaceAddress.address as `0x${string}`,
@@ -86,12 +108,12 @@ const DraggableBox = () => {
         onMouseDown={handleMouseDown}
         onWheel={handleWheel}
       >
-        <Canvas />
+        <Canvas gridColors={gridColors} handleCellClick={handleCellClick} setCoordinates={setCoordinates}/>
       </div>
       <div className='z-50 flex items-center justify-center h-36'>
         {
-          proof ?
-          <div>test</div>
+         proof ?
+          <div><ColorPalette colorOptions={colorOptions} coordinates={coordinates} setSelectedColor={setSelectedColor}/></div>
           : <WorldID onSuccess={setProof}/>
         }
       </div>

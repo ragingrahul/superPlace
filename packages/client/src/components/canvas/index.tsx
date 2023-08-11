@@ -1,16 +1,12 @@
-import React, { useState } from 'react';
-
-const Canvas: React.FC = () => {
+import React, { ReactNode,useState,Dispatch, SetStateAction } from 'react';
+type Props = {
+  handleCellClick: (row: number, col: number) => void,
+  gridColors:string[][],
+  setCoordinates:Dispatch<SetStateAction<{x:number,y:number}>>
+}
+const Canvas = ({handleCellClick,gridColors,setCoordinates}:Props) => {
   const gridRows = 100;
   const gridCols = 200;
-  const [gridColors, setGridColors] = useState<string[][]>(Array.from({ length: 200 }, () => new Array(200).fill('white')));
-
-  const handleCellClick = (row: number, col: number) => {
-    const updatedColors = [...gridColors];
-    updatedColors[row][col] = 'red';
-    setGridColors(updatedColors);
-    console.log(row,col)
-  };
 
   const generateGridCells = () => {
     const cellSize = 4;
@@ -28,7 +24,10 @@ const Canvas: React.FC = () => {
               height: `${cellSize}px`,
               backgroundColor: cellColor,
             }}
-            onClick={() => handleCellClick(row, col)}
+            onClick={() => {
+              setCoordinates({x:row,y:col})
+              handleCellClick(row, col)
+            }}
           ></div>
         );
       }

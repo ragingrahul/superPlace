@@ -15,7 +15,6 @@ import { ToastContainer } from "react-toastify";
 import { publicProvider } from 'wagmi/providers/public';
 
 import '@/styles/globals.css';
-import '@/styles/colors.css';
 import '@rainbow-me/rainbowkit/styles.css';
 import "react-toastify/ReactToastify.min.css";
 
@@ -66,7 +65,6 @@ function MyApp({ Component, pageProps }: AppProps) {
     <WagmiConfig config={wagmiConfig}>
       <RainbowKitProvider chains={chains}>
         {/* <QueryClientProvider client={reactQueryClient}> */}
-          <Header />
           <Component {...pageProps} />
           <ToastContainer position="bottom-right" newestOnTop />
         {/* </QueryClientProvider> */}

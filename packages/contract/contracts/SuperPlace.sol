@@ -12,10 +12,6 @@ contract SuperPlace {
 
     using ByteHasher for bytes;
 
-    ///////////////////////////////////////////////////////////////////////////////
-    ///                                  ERRORS                                ///
-    //////////////////////////////////////////////////////////////////////////////
-
     /// @notice Thrown when attempting to reuse a nullifier
     error InvalidNullifier();
 

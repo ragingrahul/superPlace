@@ -8,9 +8,10 @@
     "compile": "hardhat compile",
     "Goerli": "hardhat run scripts/deploy.js --network Goerli",
     "OPGoerli": "hardhat run scripts/deploy.js --network OPGoerli",
-    "BaseGoerli": "hardhat run scripts/deploy.js --network BaseGoerli",
-    "ZoraGoerli": "hardhat run scripts/deploy.js --network ZoraGoerli",
-    "ModeSepolia": "hardhat run scripts/deploy.js --network ModeSepolia"
+    "ModeSepolia": "hardhat run scripts/deploySender.js --network ModeSepolia",
+    "BaseSender": "hardhat run scripts/baseDeploySender.js --network BaseGoerli",
+    "ZoraSender": "hardhat run scripts/zoraDeploySender.js --network ZoraGoerli",
+    "ModeSender": "hardhat run scripts/modeDeploySender.js --network ModeSepolia"
   },
   "keywords": [],
   "author": "",

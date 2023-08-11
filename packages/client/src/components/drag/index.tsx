@@ -22,12 +22,12 @@ const DraggableBox = () => {
 		address: superPlaceAddress.address as `0x${string}`,
 		abi: superPlaceAbi.abi,
 		enabled: proof != null && address != null,
-		functionName: 'draw',
-		args: [
-			address!,
-			proof?.merkle_root ? decode<BigNumber>('uint256', proof?.merkle_root ?? '') : BigNumber.from(0) as any,
-			proof?.nullifier_hash ? decode<BigNumber>('uint256', proof?.nullifier_hash ?? '') : BigNumber.from(0),
-			proof?.proof
+		functionName: 'place',
+		args: [{
+			signal: address!,
+			root: proof?.merkle_root ? decode<BigNumber>('uint256', proof?.merkle_root ?? '') : BigNumber.from(0) as any,
+			nullifierHash: proof?.nullifier_hash ? decode<BigNumber>('uint256', proof?.nullifier_hash ?? '') : BigNumber.from(0),
+			proof: proof?.proof
 				? decode<[BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber]>(
 						'uint256[8]',
 						proof?.proof ?? ''
@@ -42,10 +42,10 @@ const DraggableBox = () => {
 						BigNumber.from(0),
 						BigNumber.from(0),
 				  ],
-          1, //x
-          1, //y
-          1  //color
-		],
+          x: 1, //x
+          y: 1, //y
+          color: 1  //color
+    }] as any,
 	})
 
 	const { write } = useContractWrite(config)
@@ -91,7 +91,7 @@ const DraggableBox = () => {
       <div className='z-50 flex items-center justify-center h-36'>
         {
           proof ?
-          <div>test</div>
+          <div><button onClick={write}>sent tx</button></div>
           : <WorldID onSuccess={setProof}/>
         }
       </div>

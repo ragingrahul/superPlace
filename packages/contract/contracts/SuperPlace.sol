@@ -54,7 +54,7 @@ contract SuperPlace {
         _internalPlace(_place);
     }
 
-    function hyperlanePlace(
+    function handle(
         uint32 _origin,
         bytes32 _sender,
         bytes memory _body

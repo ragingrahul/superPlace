@@ -1,10 +1,10 @@
 import React, { ReactNode,useState,Dispatch, SetStateAction } from 'react';
 type Props = {
-  handleCellClick: (row: number, col: number) => void,
   gridColors:string[][],
   setCoordinates:Dispatch<SetStateAction<{x:number,y:number}>>
+  placePixel: (row: number, col: number) => void;
 }
-const Canvas = ({handleCellClick,gridColors,setCoordinates}:Props) => {
+const Canvas = ({gridColors,setCoordinates,placePixel}:Props) => {
   const gridRows = 100;
   const gridCols = 200;
 
@@ -26,7 +26,7 @@ const Canvas = ({handleCellClick,gridColors,setCoordinates}:Props) => {
             }}
             onClick={() => {
               setCoordinates({x:row,y:col})
-              handleCellClick(row, col)
+              placePixel(row,col)
             }}
           ></div>
         );

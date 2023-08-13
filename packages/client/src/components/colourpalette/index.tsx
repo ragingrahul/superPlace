@@ -65,7 +65,6 @@ const ColorPalette = ({colorOptions,setSelectedColor,coordinates,placePixel,sele
 
   return (
     <div className="relative z-10 block px-5 py-3 overflow-hidden font-medium leading-tight text-gray-800 bg-white border-2 border-gray-900 rounded-lg">
-      {console.log(isPlaced,remainingTime)}
       <button
         style={{backgroundColor: `${isPlaced ? "#C0C0C0" : "#DC2626"}`}}
         className="text-center mb-2 w-full rounded-lg py-2 text-white border-2 border-black hover:cursor-pointer hover:bg-red-500"

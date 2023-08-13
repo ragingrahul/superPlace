@@ -13,7 +13,7 @@ import { toast } from "react-toastify";
 import superPlaceAddress from '../../../../contract/contract-address.json'
 import superPlaceAbi from '../../../../contract/artifacts/contracts/SuperPlace.sol/SuperPlace.json'
 
-import goerliSenderAddress from '../../../../contract/goerli-sender-addres.json'
+import goerliSenderAddress from '../../../../contract/goerli-sender-address.json'
 import senderAbi from '../../../../contract/artifacts/contracts/SuperPlaceSender.sol/superPlaceSender.json'
 
 const colorOptions = {

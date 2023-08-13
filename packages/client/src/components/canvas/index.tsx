@@ -1,9 +1,9 @@
-import React, { Dispatch, SetStateAction, useState } from 'react';
+import React, {useState,Dispatch, SetStateAction, forwardRef } from 'react';
 type Props = {
   gridColors: string[][],
   setCoordinates:Dispatch<SetStateAction<{x:number,y:number}>>
 }
-const Canvas = ({gridColors, setCoordinates}:Props) => {
+const Canvas:React.ForwardRefRenderFunction<HTMLDivElement,Props> = ({gridColors,setCoordinates}:Props,ref) => {
   const gridRows = 100;
   const gridCols = 200;
   const [cellHover, setCellHover] = useState<any>(null)
@@ -40,7 +40,7 @@ const Canvas = ({gridColors, setCoordinates}:Props) => {
   };
 
   return (
-    <div className='flex items-center flex-col'>
+    <div ref={ref} className='flex items-center flex-col'>
       <div className='flex flex-wrap w-[800px]' >
         {generateGridCells()}
       </div>
@@ -48,4 +48,4 @@ const Canvas = ({gridColors, setCoordinates}:Props) => {
   );
 };
 
-export default Canvas;
+export default forwardRef(Canvas);

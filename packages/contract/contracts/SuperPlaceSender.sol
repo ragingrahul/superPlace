@@ -31,13 +31,13 @@ contract superPlaceSender {
         igp.payForGas{value: msg.value}(
             messageId, // The ID of the message that was just dispatched
             OptimismGoerli, // The destination domain of the message
-            10000, // 100k gas to use in the recipient's handle function
+            450000, // 100k gas to use in the recipient's handle function
             msg.sender // refunds go to msg.sender, who paid the msg.value
         );
     }
 
     function quoteGasPayment() public view returns(uint256) {
-        uint256 gasQuote = igp.quoteGasPayment(OptimismGoerli, 10000);
+        uint256 gasQuote = igp.quoteGasPayment(OptimismGoerli, 20000);
         return gasQuote;
     }
 }

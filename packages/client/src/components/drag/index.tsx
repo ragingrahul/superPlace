@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Canvas from '../canvas';
 import WorldID from '../worldcoin';
 import ColorPalette from '../colourpalette';
-import { useContractReads, usePrepareContractWrite } from 'wagmi';
+import { useContractReads, useContractRead, usePrepareContractWrite, useNetwork } from 'wagmi';
 import { useContractWrite } from 'wagmi';
 import { useAccount } from 'wagmi';
 import { BigNumber } from 'ethers'
@@ -12,6 +12,9 @@ import { toast } from "react-toastify";
 
 import superPlaceAddress from '../../../../contract/contract-address.json'
 import superPlaceAbi from '../../../../contract/artifacts/contracts/SuperPlace.sol/SuperPlace.json'
+
+import goerliSenderAddress from '../../../../contract/goerli-sender-addres.json'
+import senderAbi from '../../../../contract/artifacts/contracts/SuperPlaceSender.sol/superPlaceSender.json'
 
 const colorOptions = {
   red: '#FF0000',
@@ -26,6 +29,8 @@ const colorOptions = {
 
 const DraggableBox = () => {
   const { address } = useAccount()
+  const { chain } = useNetwork()
+
   // create row index to call contract
   const rowIds = Array.from({ length: 100 }, (_, index) => index);
 
@@ -39,14 +44,38 @@ const DraggableBox = () => {
   const { data: grid , refetch } = useContractReads({
     contracts: rowIds.map(id => ({
       address: superPlaceAddress.address as `0x${string}`,
-		    abi: superPlaceAbi.abi as any,
-        functionName: 'getCanvas',
-        args: [id as any],
-        chainId: 420 // only call from op-goerli
+      abi: superPlaceAbi.abi as any,
+      functionName: 'getCanvas',
+      args: [id as any],
+      chainId: 420 // only call from op-goerli
     })),
     cacheTime: 10_000,
     staleTime: 10_000,
   })
+
+  const { data: quoteGasPayment , refetch: senderRefetch } = useContractRead({
+    address: (chain?.id === 5 ? goerliSenderAddress.addess : goerliSenderAddress.addess) as `0x${string}`,
+    abi: senderAbi.abi as any,
+    functionName: 'quoteGasPayment',
+    chainId: chain?.id,
+    cacheTime: 10_000,
+    staleTime: 10_000,
+  })
+
+  useEffect(() => {
+    // Call fetchData immediately when the component renders
+    if(chain?.id !== 420) senderRefetch?.()
+
+    // Set up an interval to call fetchData every 10 seconds
+    const interval = setInterval(() => {
+      if(chain?.id !== 420) senderRefetch?.()
+    }, 10000); // 10000 milliseconds = 10 seconds
+
+    // Cleanup khi component unmount
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
 
   useEffect(() => {
     // Call fetchData immediately when the component renders
@@ -100,6 +129,39 @@ const DraggableBox = () => {
 	})
 
 	const { write, isLoading, isSuccess } = useContractWrite(config)
+
+  const { config:senderConfig } = usePrepareContractWrite({
+		address: (chain?.id === 5 ? goerliSenderAddress.addess : goerliSenderAddress.addess) as `0x${string}`,
+		abi: senderAbi.abi,
+		enabled: proof != null && address != null,
+		functionName: 'sendAndPayForMessage',
+		args: [{
+			signal: address!,
+			root: proof?.merkle_root ? decode<BigNumber>('uint256', proof?.merkle_root ?? '') : BigNumber.from(0) as any,
+			nullifierHash: proof?.nullifier_hash ? decode<BigNumber>('uint256', proof?.nullifier_hash ?? '') : BigNumber.from(0),
+			proof: proof?.proof
+				? decode<[BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber, BigNumber]>(
+						'uint256[8]',
+						proof?.proof ?? ''
+				  )
+				: [
+						BigNumber.from(0),
+						BigNumber.from(0),
+						BigNumber.from(0),
+						BigNumber.from(0),
+						BigNumber.from(0),
+						BigNumber.from(0),
+						BigNumber.from(0),
+						BigNumber.from(0),
+				  ],
+          x: coordinates.x, //x
+          y: coordinates.y, //y
+          color: selectedColor  //color
+      }] as any,
+    value: quoteGasPayment as any
+	})
+
+	const { write: senderWrite, isLoading: senderIsLoading, isSuccess: senderIsSuccess } = useContractWrite(senderConfig)
 
   useEffect(() => {
     if(isLoading) {
@@ -189,7 +251,7 @@ const DraggableBox = () => {
             <ColorPalette
               colorOptions={colorOptions}
               coordinates={coordinates}
-              placePixel={write}
+              placePixel={chain?.id === 420 ? write : senderWrite}
               setSelectedColor={setSelectedColor}
               selectedColor={selectedColor}
               isPlaced={placed}

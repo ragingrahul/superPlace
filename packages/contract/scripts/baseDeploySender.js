@@ -21,7 +21,7 @@ async function main() {
   }
 
   // Save the updated array to the JSON file
-  fs.writeFileSync('base-sender-addres.json', JSON.stringify(contractAddress, null, 2));
+  fs.writeFileSync('base-sender-address.json', JSON.stringify(contractAddress, null, 2));
 }
 
 // We recommend this pattern to be able to use async/await everywhere

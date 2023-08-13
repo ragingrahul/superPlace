@@ -11,7 +11,8 @@
     "ModeSepolia": "hardhat run scripts/deploySender.js --network ModeSepolia",
     "BaseSender": "hardhat run scripts/baseDeploySender.js --network BaseGoerli",
     "ZoraSender": "hardhat run scripts/zoraDeploySender.js --network ZoraGoerli",
-    "ModeSender": "hardhat run scripts/modeDeploySender.js --network ModeSepolia"
+    "ModeSender": "hardhat run scripts/modeDeploySender.js --network ModeSepolia",
+    "GoerliSender": "hardhat run scripts/goerliDeploySender.js --network Goerli"
   },
   "keywords": [],
   "author": "",

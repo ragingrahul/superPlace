@@ -6,8 +6,8 @@ const hyperlaneContract = require('../libs/constant.json');
 
 async function main() {
   const _opGoerliRecipient = superPlaceContract.address;
-  const _mailbox = hyperlaneContract.mode.mailbox;
-  const _interchainGasPaymaster = hyperlaneContract.mode.interchainGasPaymaster;
+  const _mailbox = hyperlaneContract.goerli.mailbox;
+  const _interchainGasPaymaster = hyperlaneContract.goerli.interchainGasPaymaster;
   const superPlaceSender = await hre.ethers.deployContract("superPlaceSender", [_opGoerliRecipient, _mailbox, _interchainGasPaymaster]);
 
   await superPlaceSender.waitForDeployment();
@@ -21,7 +21,7 @@ async function main() {
   }
 
   // Save the updated array to the JSON file
-  fs.writeFileSync('mode-sender-address.json', JSON.stringify(contractAddress, null, 2));
+  fs.writeFileSync('goerli-sender-address.json', JSON.stringify(contractAddress, null, 2));
 }
 
 // We recommend this pattern to be able to use async/await everywhere

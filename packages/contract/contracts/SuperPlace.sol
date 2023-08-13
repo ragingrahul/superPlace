@@ -7,7 +7,7 @@ import { PlaceStruct } from "./helpers/Struct.sol";
 
 contract SuperPlace {
     mapping(uint256 => mapping(uint256 => bool)) internal havePlace;
-    uint8[100][200] public canvas;
+    string[200][100] public canvas;
     uint256 public currentRound;
 
     using ByteHasher for bytes;
@@ -29,7 +29,7 @@ contract SuperPlace {
 
     // Event
     event Received(uint32 origin, address sender, bytes body);
-    event Placed(address user, uint256 x, uint256 y, uint256 color);
+    event Placed(address user, uint256 x, uint256 y, string color);
 
     /// @param _worldId The WorldID instance that will verify the proofs
     /// @param _appId The World ID app ID
@@ -97,5 +97,9 @@ contract SuperPlace {
         uint currentBlockNumber = block.number;
         uint currentTimestamp = block.timestamp;
         return (currentBlockNumber, currentTimestamp);
+    }
+
+    function getCanvas(uint8 x) public view returns (string[200] memory) {
+        return canvas[x];
     }
 }

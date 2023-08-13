@@ -1,4 +1,9 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+
+import superPlaceAddress from '../../../../contract/contract-address.json'
+import superPlaceAbi from '../../../../contract/artifacts/contracts/SuperPlace.sol/SuperPlace.json'
+import { useContractRead } from "wagmi";
+import CountdownTimer from "../countdown";
 
 type ColorOptions = {
   red: string;
@@ -14,34 +19,81 @@ type Props={
   colorOptions:ColorOptions,
   coordinates:{x:number,y:number},
   setSelectedColor:Dispatch<SetStateAction<string>>,
-  placePixel: (row: number, col: number) => void;
+  placePixel: (() => void) | undefined ;
+  selectedColor: string
+  isPlaced: boolean
+  setPlaced: Dispatch<SetStateAction<boolean>>,
 }
 
-const ColorPalette = ({colorOptions,setSelectedColor,coordinates,placePixel}:Props) => {
+const ColorPalette = ({colorOptions,setSelectedColor,coordinates,placePixel,selectedColor,isPlaced,setPlaced}:Props) => {
+  const [remainingTime, setRemainingTime] = useState<number>(0)
+  const { data: currentRound , refetch } = useContractRead({
+    address: superPlaceAddress.address as `0x${string}`,
+    abi: superPlaceAbi.abi,
+    functionName: 'currentRound',
+    chainId: 420, // only call from op-goerli
+    cacheTime: 10_000,
+    staleTime: 10_000,
+  })
+
+  useEffect(() => {
+    // Call fetchData immediately when the component renders
+    refetch?.()
+
+    // Set up an interval to call fetchData every 10 seconds
+    const interval = setInterval(() => {
+      refetch?.()
+    }, 20000); // 20000 milliseconds = 20 seconds
+
+    // Cleanup khi component unmount
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const currentTime = Math.floor(Date.now() / 1000);
+      setRemainingTime((Number(currentRound?.toString()) +180) - currentTime);
+      if((Number(currentRound?.toString()) +180) - currentTime === 0) {
+        setPlaced(false)
+      }
+    }, 1000);
+
+    return () => clearInterval(intervalId);
+  }, [currentRound]);
+
   return (
-    // <div className="relative inline-block text-lg group">
-    <span className="relative z-10 block px-5 py-3 overflow-hidden font-medium leading-tight text-gray-800 bg-white border-2 border-gray-900 rounded-lg">
-      <p className="text-center mb-2 rounded-lg py-2 text-white border-2 border-black bg-red-600 hover:cursor-pointer hover:bg-red-500"
-        onClick={()=>placePixel(coordinates.x,coordinates.y)}
+    <div className="relative z-10 block px-5 py-3 overflow-hidden font-medium leading-tight text-gray-800 bg-white border-2 border-gray-900 rounded-lg">
+      {console.log(isPlaced,remainingTime)}
+      <button
+        style={{backgroundColor: `${isPlaced ? "#C0C0C0" : "#DC2626"}`}}
+        className="text-center mb-2 w-full rounded-lg py-2 text-white border-2 border-black hover:cursor-pointer hover:bg-red-500"
+        onClick={placePixel}
+        disabled={isPlaced}
       >
-        {`Place (${coordinates.x+","+coordinates.y})`}
-      </p>
-      <nav>
+        {isPlaced ?
+          <CountdownTimer remainingTime={remainingTime} />
+          :`Place (${coordinates.x+","+coordinates.y})`
+        }
+      </button>
+      <div>
         {
           Object.entries(colorOptions).map(([colorName, colorCode]) => (
             <button
               key={colorName}
-              style={{ backgroundColor: colorCode }}
+              style={{
+                backgroundColor: colorCode,
+                boxShadow: (selectedColor === colorCode) ? "inset 0 0 0 3px rgba(0, 0, 0, 5)" : "0 0 0 0 rgba(0, 0, 0, 0)"
+              }}
               onClick={() => setSelectedColor(colorCode)}
               className='w-16 h-12 border-black border-2 mx-1 hover:opacity-75 hover:cursor-pointer'
             >
             </button>
           ))
         }
-      </nav>
-    </span>
-    
-    // </div>
+      </div>
+    </div>
   )
 }
 

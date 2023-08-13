@@ -1,12 +1,17 @@
-import React, { ReactNode,useState,Dispatch, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction, useState } from 'react';
 type Props = {
-  gridColors:string[][],
+  gridColors: string[][],
   setCoordinates:Dispatch<SetStateAction<{x:number,y:number}>>
-  placePixel: (row: number, col: number) => void;
 }
-const Canvas = ({gridColors,setCoordinates,placePixel}:Props) => {
+const Canvas = ({gridColors, setCoordinates}:Props) => {
   const gridRows = 100;
   const gridCols = 200;
+  const [cellHover, setCellHover] = useState<any>(null)
+
+  const onSelectCell = ({row,col} : any) => {
+    setCoordinates({x:row,y:col})
+    setCellHover({x:row,y:col})
+  }
 
   const generateGridCells = () => {
     const cellSize = 4;
@@ -23,11 +28,9 @@ const Canvas = ({gridColors,setCoordinates,placePixel}:Props) => {
               width: `${cellSize}px`,
               height: `${cellSize}px`,
               backgroundColor: cellColor,
+              boxShadow: (cellHover && cellHover.x === row && cellHover.y === col) ? "inset 0 0 0 0.5px rgba(0, 0, 0, 0.5)" : "0 0 0 0 rgba(0, 0, 0, 0)"
             }}
-            onClick={() => {
-              setCoordinates({x:row,y:col})
-              placePixel(row,col)
-            }}
+            onClick={() => onSelectCell({row,col})}
           ></div>
         );
       }

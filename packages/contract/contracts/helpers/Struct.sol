@@ -15,5 +15,5 @@ struct PlaceStruct {
   uint256[8] proof;
   uint8 x;
   uint8 y;
-  uint8 color;
+  string color;
 }

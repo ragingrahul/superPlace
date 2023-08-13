@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState,useCallback, useRef } from 'react';
 import Canvas from '../canvas';
 import WorldID from '../worldcoin';
 import ColorPalette from '../colourpalette';
-import { useContractReads, useContractRead, usePrepareContractWrite, useNetwork } from 'wagmi';
-import { useContractWrite } from 'wagmi';
+import { useContractReads, useContractRead, usePrepareContractWrite, useContractWrite, useNetwork } from 'wagmi';
+import MintZora from '../mintButton';
+import { saveToIPFS } from '@/utils/saveToIPFS';
+import {toPng} from 'html-to-image'
 import { useAccount } from 'wagmi';
 import { BigNumber } from 'ethers'
 import { decode } from '@/lib/wld'
@@ -34,6 +36,7 @@ const DraggableBox = () => {
   // create row index to call contract
   const rowIds = Array.from({ length: 100 }, (_, index) => index);
 
+  const canvasRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [scale, setScale] = useState(1);
   const [placed, setPlaced] = useState(false)
@@ -97,6 +100,39 @@ const DraggableBox = () => {
       grid.map(obj => obj.result?.map(value => value === "" ? "white" : value))
       : Array.from({ length: 100 }, () => new Array(200).fill('white'));
   }, [grid]);
+
+const dataUrlToFile=async(dataUrl:string)=>{
+  const byteString = atob(dataUrl.split(',')[1]);
+  const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
+  const arrayBuffer = new ArrayBuffer(byteString.length);
+  const uint8Array = new Uint8Array(arrayBuffer);
+
+  for (let i = 0; i < byteString.length; i++) {
+    uint8Array[i] = byteString.charCodeAt(i);
+  }
+
+  const blob = new Blob([arrayBuffer], { type: mimeString });
+
+  
+  const file = new File([blob], 'Canvas.png', { type: mimeString });
+  return file
+}
+
+  const onButtonClick = useCallback(() => {
+    if (canvasRef.current === null) {
+      return
+    }
+
+    toPng(canvasRef.current, { cacheBust: true, })
+      .then(async (dataUrl: any) => {
+        const file=await dataUrlToFile(dataUrl)
+        const cid=await saveToIPFS(file)
+        console.log(file,cid)
+      })
+      .catch((err: any) => {
+        console.log(err)
+      })
+  }, [canvasRef])
 
   const { config } = usePrepareContractWrite({
 		address: superPlaceAddress.address as `0x${string}`,
@@ -242,7 +278,7 @@ const DraggableBox = () => {
         onWheel={handleWheel}
       >
         {gridColors &&
-          <Canvas gridColors={gridColors} setCoordinates={setCoordinates}/>
+          <Canvas ref={canvasRef} gridColors={gridColors} setCoordinates={setCoordinates}/>
         }
       </div>
       <div className='z-50 flex items-center justify-center h-36'>

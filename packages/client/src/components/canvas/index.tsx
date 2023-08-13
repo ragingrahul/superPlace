@@ -1,4 +1,4 @@
-import React, { ReactNode,useState,Dispatch, SetStateAction,forwardRef } from 'react';
+import React, {useState,Dispatch, SetStateAction, forwardRef } from 'react';
 type Props = {
   gridColors: string[][],
   setCoordinates:Dispatch<SetStateAction<{x:number,y:number}>>

@@ -113,7 +113,6 @@ const dataUrlToFile=async(dataUrl:string)=>{
 
   const blob = new Blob([arrayBuffer], { type: mimeString });
 
-  
   const file = new File([blob], 'Canvas.png', { type: mimeString });
   return file
 }
@@ -125,9 +124,9 @@ const dataUrlToFile=async(dataUrl:string)=>{
 
     toPng(canvasRef.current, { cacheBust: true, })
       .then(async (dataUrl: any) => {
-        const file=await dataUrlToFile(dataUrl)
-        const cid=await saveToIPFS(file)
-        console.log(file,cid)
+        const file= await dataUrlToFile(dataUrl)
+        const cid= await saveToIPFS(file)
+        console.log(file, cid)
       })
       .catch((err: any) => {
         console.log(err)
@@ -269,6 +268,9 @@ const dataUrlToFile=async(dataUrl:string)=>{
 
   return (
     <div>
+      <div className='z-50 flex items-center justify-center h-36'>
+        <MintZora />
+      </div>
       <div
         className="relative"
         style={{

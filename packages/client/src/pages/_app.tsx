@@ -3,10 +3,8 @@ import { AppProps } from 'next/app';
 import { configureChains, createConfig, WagmiConfig } from 'wagmi';
 import {
   baseGoerli,
-  foundry,
   goerli,
   optimismGoerli,
-  polygonMumbai,
   zoraTestnet,
 } from 'wagmi/chains';
 import { ToastContainer } from "react-toastify";
@@ -21,11 +19,9 @@ import { useIsSsr } from '../utils/ssr';
 const { chains, publicClient, webSocketPublicClient } = configureChains(
   [
     goerli,
-    polygonMumbai,
     optimismGoerli,
     baseGoerli,
     zoraTestnet,
-    foundry
     // ...(process.env.REACT_APP_ENABLE_TESTNETS === 'true' ? [goerli] : []),
   ],
   [publicProvider()]

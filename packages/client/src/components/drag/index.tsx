@@ -3,7 +3,6 @@ import Canvas from '../canvas';
 import WorldID from '../worldcoin';
 import ColorPalette from '../colourpalette';
 import { useContractReads, useContractRead, usePrepareContractWrite, useContractWrite, useNetwork } from 'wagmi';
-import MintZora from '../mintButton';
 import { saveToIPFS } from '@/utils/saveToIPFS';
 import {toPng} from 'html-to-image'
 import { useAccount } from 'wagmi';
@@ -11,6 +10,9 @@ import { BigNumber } from 'ethers'
 import { decode } from '@/lib/wld'
 import { ISuccessResult } from '@worldcoin/idkit';
 import { toast } from "react-toastify";
+import { zoraNftCreatorV1Config } from "@zoralabs/zora-721-contracts"
+import Link from 'next/link';
+import CustomButton from '../button';
 
 import superPlaceAddress from '../../../../contract/contract-address.json'
 import superPlaceAbi from '../../../../contract/artifacts/contracts/SuperPlace.sol/SuperPlace.json'
@@ -43,6 +45,7 @@ const DraggableBox = () => {
   const [proof, setProof] = useState<ISuccessResult | null>(null)
   const [selectedColor, setSelectedColor]=useState<string>("#FF0000")
   const [coordinates, setCoordinates]=useState<{x:number,y:number}>({x:0,y:0})
+  const [cid, setCid] = useState("")
 
   const { data: grid , refetch } = useContractReads({
     contracts: rowIds.map(id => ({
@@ -101,23 +104,23 @@ const DraggableBox = () => {
       : Array.from({ length: 100 }, () => new Array(200).fill('white'));
   }, [grid]);
 
-const dataUrlToFile=async(dataUrl:string)=>{
-  const byteString = atob(dataUrl.split(',')[1]);
-  const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
-  const arrayBuffer = new ArrayBuffer(byteString.length);
-  const uint8Array = new Uint8Array(arrayBuffer);
+  const dataUrlToFile=async(dataUrl:string)=>{
+    const byteString = atob(dataUrl.split(',')[1]);
+    const mimeString = dataUrl.split(',')[0].split(':')[1].split(';')[0];
+    const arrayBuffer = new ArrayBuffer(byteString.length);
+    const uint8Array = new Uint8Array(arrayBuffer);
 
-  for (let i = 0; i < byteString.length; i++) {
-    uint8Array[i] = byteString.charCodeAt(i);
+    for (let i = 0; i < byteString.length; i++) {
+      uint8Array[i] = byteString.charCodeAt(i);
+    }
+
+    const blob = new Blob([arrayBuffer], { type: mimeString });
+
+    const file = new File([blob], 'Canvas.png', { type: mimeString });
+    return file
   }
 
-  const blob = new Blob([arrayBuffer], { type: mimeString });
-
-  const file = new File([blob], 'Canvas.png', { type: mimeString });
-  return file
-}
-
-  const onButtonClick = useCallback(() => {
+  const onGenerateNFT = useCallback(() => {
     if (canvasRef.current === null) {
       return
     }
@@ -126,12 +129,55 @@ const dataUrlToFile=async(dataUrl:string)=>{
       .then(async (dataUrl: any) => {
         const file= await dataUrlToFile(dataUrl)
         const cid= await saveToIPFS(file)
-        console.log(file, cid)
+        setCid(`https://${cid}.ipfs.nftstorage.link`)
       })
       .catch((err: any) => {
         console.log(err)
       })
   }, [canvasRef])
+
+  ////////////// zora
+  const name = `super/Place ${new Date().toISOString().replace(/T/, ':').replace(/\..+/, '')}`;
+  const symbol = "S/P"
+  const defaultAdmin = address as `0x${string}`;
+  // @ts-ignore
+  const editionSize = 50n;
+  const royaltyBPS = 0;
+  const fundsRecipient = address as `0x${string}`;
+  const saleConfig= {
+    maxSalePurchasePerAddress : 100,
+    // @ts-ignore
+    presaleEnd: 0n,
+    // @ts-ignore
+    presaleStart: 0n,
+    presaleMerkleRoot: "0x0000000000000000000000000000000000000000000000000000000000000000",
+    // @ts-ignore
+    publicSaleEnd: 18446744073709551615n,
+    // @ts-ignore
+    publicSalePrice: 0n,
+    // @ts-ignore
+    publicSaleStart: 0n,
+  }
+
+  const { config: zoraConfig } = usePrepareContractWrite({
+    abi: zoraNftCreatorV1Config.abi,
+    // @ts-ignore
+    address: zoraNftCreatorV1Config.address[chain?.id] as `0x${string}`,
+    functionName: 'createDrop',
+    args: [
+      name,
+      symbol,
+      defaultAdmin,
+      editionSize,
+      royaltyBPS,
+      fundsRecipient,
+      saleConfig,
+      cid,
+      cid,
+    ]
+	})
+
+  const { write: writeZora } = useContractWrite(zoraConfig)
 
   const { config } = usePrepareContractWrite({
 		address: superPlaceAddress.address as `0x${string}`,
@@ -268,8 +314,26 @@ const dataUrlToFile=async(dataUrl:string)=>{
 
   return (
     <div>
-      <div className='z-50 flex items-center justify-center h-36'>
-        <MintZora />
+      <div>
+        <div className='z-50 flex items-center justify-center h-36 gap-4'>
+          <CustomButton open={onGenerateNFT}>
+            <span className="relative flex">
+              {"Take snapshot"}
+            </span>
+          </CustomButton>
+          <CustomButton open={() => writeZora?.()}>
+            <span className="relative flex">
+              {"Mint canvas"}
+            </span>
+          </CustomButton>
+        </div>
+        <div className='flex items-center justify-center h-12'>
+          {cid.length > 0 &&
+            <Link href={cid}>
+              IPFS links: <a>{cid}</a>
+            </Link>
+          }
+        </div>
       </div>
       <div
         className="relative"
